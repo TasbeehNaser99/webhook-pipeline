@@ -1,19 +1,39 @@
 services:
-  postgres:
-    image: postgres:15-alpine
+  db:
+    image: postgres:15
+    container_name: webhook-pipeline-db
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: pipeline_db
     ports:
       - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
 
   redis:
-    image: redis:7-alpine
+    image: redis:7
+    container_name: webhook-pipeline-redis
     ports:
       - "6379:6379"
 
-volumes:
-  pgdata:
+  api:
+    build: .
+    container_name: webhook-pipeline-api
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    build: .
+    container_name: webhook-pipeline-worker
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+    command: npx tsx src/worker/index.ts
+    depends_on:
+      - db
+      - redis

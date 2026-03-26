@@ -2,17 +2,20 @@
   "name": "webhook-pipeline",
   "version": "1.0.0",
   "description": "",
-   "type": "module",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec \"node --loader ts-node/esm\" src/api/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx tsx watch src/api/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@bull-board/api": "^6.20.6",
+    "@bull-board/express": "^6.20.6",
     "@types/express": "^5.0.6",
+    "axios": "^1.13.6",
     "bullmq": "^5.71.0",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",

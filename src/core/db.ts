@@ -3,7 +3,7 @@ import { Pool } from 'pg';
 
 export const pool = new Pool({
   user: 'user',
-  host: 'localhost',
+  host: process.env.DB_HOST ||'localhost',
   database: 'pipeline_db',
   password: 'password',
   port: 5432,
