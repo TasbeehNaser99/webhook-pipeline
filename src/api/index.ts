@@ -1,6 +1,9 @@
+import jobsRouter from './routes/jobs.js';
+import pipelineRoutes from './routes/pipelines.js';
 import express from 'express';
 import { Queue } from 'bullmq';
 import { pool } from '../core/db.js';
+import { webhookQueue } from '../core/queue.js';
 
 import { createBullBoard } from '@bull-board/api';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
@@ -8,13 +11,8 @@ import { ExpressAdapter } from '@bull-board/express';
 
 const app = express();
 app.use(express.json());
-
-const webhookQueue = new Queue('webhook-queue', {
-  connection: {
-    host:process.env.REDIS_HOST || 'localhost',
-    port: 6379
-  }
-});
+app.use('/jobs', jobsRouter);
+app.use('/pipelines', pipelineRoutes);
 
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/admin/queues');
@@ -54,17 +52,18 @@ app.post('/webhook/:path', async (req, res) => {
 
     const jobId = jobResult.rows[0].id;
 
-    await webhookQueue.add('process-webhook', {
-      jobId: jobId,
-      payload: payload,
-      processorType: result.rows[0].processor_type
-    }, {
-      attempts: 3, 
-      backoff: {
-        type: 'exponential',
-        delay: 5000 
-      }
-    });
+     await webhookQueue.add('process-webhook', {
+  jobId: jobId,
+  pipeline_id: result.rows[0].id, 
+  payload: payload,
+  processorType: result.rows[0].processor_type
+}, {
+  attempts: 3,
+  backoff: {
+    type: 'exponential',
+    delay: 5000
+  }
+});
 
     console.log(`📤 Job ${jobId} added to Redis queue`);
 
