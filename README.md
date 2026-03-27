@@ -102,7 +102,7 @@ A dashboard is available to monitor queue health:
 
 - **URL:** http://localhost:3000/admin/queues
 
-## 🛠️ TTech Stack & Tools
+## 🛠️ Tech Stack & Tools
 
 - **Backend:** TypeScript, Express.js
 - **Queue Management:** BullMQ, Redis
