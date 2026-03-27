@@ -1,52 +1,67 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15
     container_name: webhook-pipeline-db
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: pipeline_db
+      POSTGRES_USER: ${DB_USER:-user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-pipeline_db}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${DB_USER:-user} -d $${DB_NAME:-pipeline_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
   redis:
     image: redis:7-alpine
     container_name: webhook-pipeline-redis
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   api:
     build: .
     container_name: webhook-pipeline-api
+    command: sh -c "npm start"
     ports:
       - "3000:3000"
     environment:
       DB_HOST: db
       REDIS_HOST: redis
-      DB_USER: user
-      DB_PASSWORD: password
-      DB_NAME: pipeline_db
+      REDIS_PORT: 6379
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   worker:
     build: .
     container_name: webhook-pipeline-worker
     environment:
-      DB_HOST: db
-      REDIS_HOST: redis
-      DB_USER: user
-      DB_PASSWORD: password
-      DB_NAME: pipeline_db
+      - DB_HOST=db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
     command: npx tsx src/worker/index.ts
     depends_on:
-      - db
-      - redis
-
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 volumes:
   pgdata:

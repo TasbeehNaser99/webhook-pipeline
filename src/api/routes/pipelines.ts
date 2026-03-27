@@ -11,6 +11,11 @@ const webhookQueue = new Queue('webhook-queue', {
 
 router.post('/', async (req, res) => {
   const { source_path, processor_type, name, subscriber_url } = req.body;
+  
+  if (!source_path || !processor_type) {
+    return res.status(400).json({ error: 'source_path and processor_type are required' });
+  }
+
   try {
     const result = await pool.query(
       'INSERT INTO pipelines (name, source_path, processor_type, subscriber_url) VALUES ($1, $2, $3, $4) RETURNING *',
@@ -18,11 +23,14 @@ router.post('/', async (req, res) => {
         name || `Pipeline-${source_path}`,
         source_path,
         processor_type,
-        subscriber_url || 'http://localhost/callback'
+        subscriber_url || 'https://httpbin.org/post' 
       ]
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
+    if (err.code === '23505') {
+       return res.status(400).json({ error: 'Pipeline path already exists' });
+    }
     res.status(500).json({ error: err.message });
   }
 });

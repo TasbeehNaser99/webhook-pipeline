@@ -62,6 +62,13 @@ app.post('/webhook/:path', async (req, res) => {
   backoff: {
     type: 'exponential',
     delay: 5000
+  },
+ removeOnComplete: {
+    count: 50, 
+    age: 24 * 3600
+  },
+  removeOnFail: {
+    count: 500
   }
 });
 

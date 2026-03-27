@@ -1,12 +1,13 @@
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install && npm install -g tsx
+
+RUN npm install
 
 COPY . .
 
 EXPOSE 3000
 
-CMD ["tsx", "src/api/index.ts"]
+CMD ["npm", "start"]

@@ -3,6 +3,6 @@ import { Queue } from 'bullmq';
 export const webhookQueue = new Queue('webhook-queue', {
   connection: {
     host: process.env.REDIS_HOST || 'localhost',
-    port: 6379,
+    port: parseInt(process.env.REDIS_PORT || '6379'),
   },
 });

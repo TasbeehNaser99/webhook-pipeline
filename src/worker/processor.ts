@@ -65,7 +65,10 @@ const worker = new Worker('webhook-queue', async (job) => {
     await pool.query('UPDATE jobs SET status = $1 WHERE id = $2', ['failed', jobId]);
   }
 }, {
-  connection: { host: 'localhost', port: 6379 },
+ connection = {
+  host: process.env.REDIS_HOST || 'localhost',
+  port: parseInt(process.env.REDIS_PORT || '6379'),
+},
  
   removeOnComplete: { count: 100 },
   removeOnFail: { count: 500 }
