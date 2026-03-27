@@ -111,5 +111,31 @@ A dashboard is available to monitor queue health:
 - **Security:** Crypto (HMAC-SHA256)
 - **Monitoring:** BullBoard
 
+---
 
+## 📊 System Performance in Action
+
+Here is a practical demonstration of how the system handles real-world scenarios, illustrating its robustness and observability.
+
+### 🛡️ Resilience & Reliability (Worker Logs)
+
+<img src="./assets/screenshots/logs.png" alt="Worker logs showing retries" width="100%"/>
+
+**Figure 1: Exponential Backoff & Automatic Retries.**
+This image captures the moment the system encountered a temporary failure when calling the subscriber URL (`https://httpbin.org/post`). Notice how the system handled it:
+1.  **Transient Failure:** The worker logs `Delivery Failed: timeout of 5000ms exceeded`.
+2.  **Built-in Resilience:** BullMQ automatically enqueues the job for a retry using **Exponential Backoff**.
+3.  **Final Success:** After two failed attempts, the network transient clears, and the third attempt succeeds (`✅ Delivery Successful!`). This demonstrates **Zero-Drop reliability** for the pipeline.
+
+### 🔍 System Observability (Bull Dashboard)
+
+<img src="./assets/screenshots/dashboard.png" alt="Bull Dashboard showing job details" width="100%"/>
+
+**Figure 2: Job Lifecycle and Payload Visibility.**
+This image shows the live dashboard at `localhost:3000/admin/queues`. It provides full transparency into the pipeline:
+* **Active States:** The `ACTIVE` tab is selected, showing one job currently in processing.
+* **Job Metadata:** The raw payload of the incoming webhook (`jobData`) is completely visible (Pipeline ID, Data: `it works!`).
+* **Audit Trail:** Precise timestamps for when the job was added, started, and finished are provided for audit and debugging purposes.
+
+---
 
