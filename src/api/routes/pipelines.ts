@@ -67,7 +67,9 @@ router.post('/:path', async (req, res) => {
         type: 'exponential',
         delay: 1000
       },
-      removeOnComplete: true 
+      removeOnComplete: {
+       count :50
+       } 
     });
 
     res.status(202).json({ 

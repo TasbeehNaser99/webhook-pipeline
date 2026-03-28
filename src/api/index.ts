@@ -28,7 +28,7 @@ app.post('/webhook/:path', async (req, res) => {
   const payload = req.body;
 
   const apiKey = req.headers['x-api-key'];
-  const MASTER_KEY = 'tasbeeh_secret_123';
+  const MASTER_KEY = process.env.MASTER_API_KEY;
 
   if (apiKey !== MASTER_KEY) {
     console.log('🚫 Unauthorized access attempt!');
