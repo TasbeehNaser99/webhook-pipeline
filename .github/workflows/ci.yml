@@ -2,29 +2,36 @@ name: Continuous Integration (Code Quality)
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   test-and-lint:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [20]
+
     steps:
-      - name: Checkout Code
+      - name: 📥 Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      - name: Install Dependencies
-        run: npm install
+      - name: 📦 Install Dependencies
+        run: npm ci
 
-      - name: Check Typescript Compilation (TSC)
+      - name: 🧠 TypeScript Check
         run: npx tsc --noEmit
 
-      - name: Run Linter
-        run: npm run lint || echo "Linting skipped (No script found)"
+      - name: 🧹 Run Linter
+        run: npm run lint
+
+      - name: 🧪 Run Tests
+        run: npm test
