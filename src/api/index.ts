@@ -1,7 +1,6 @@
 import jobsRouter from './routes/jobs.js';
 import pipelineRoutes from './routes/pipelines.js';
 import express from 'express';
-import { Queue } from 'bullmq';
 import { pool } from '../core/db.js';
 import { webhookQueue } from '../core/queue.js';
 

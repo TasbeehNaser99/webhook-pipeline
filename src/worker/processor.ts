@@ -1,8 +1,9 @@
+import { AxiosError } from 'axios';
 import { Worker } from 'bullmq';
 import { pool } from '../core/db.js';
 import axios from 'axios';
 
-const worker = new Worker('webhook-queue', async (job) => {
+export const worker = new Worker('webhook-queue', async (job) => {
   const { jobId, payload, processorType } = job.data;
   console.log(`🛠️ Processing Job ${jobId}...`);
 
@@ -43,13 +44,18 @@ const worker = new Worker('webhook-queue', async (job) => {
           timeout: 10000 
         });
         console.log(`✅ Callback sent successfully to ${callbackUrl}`);
-      } catch (axiosError: any) {
+      } catch (axiosError: unknown) {
+      const errorDetail =
+      axiosError instanceof AxiosError && axiosError.response
+      ? `${axiosError.response.status} ${axiosError.response.statusText}`
+      : axiosError instanceof Error
+      ? axiosError.message
+      : 'Unknown error';
+
+  console.error(`⚠️ Callback failed: ${errorDetail}`);
+}
       
-        const errorDetail = axiosError.response 
-          ? `${axiosError.response.status} ${axiosError.response.statusText}` 
-          : axiosError.message;
-        console.error(`⚠️ Callback failed: ${errorDetail}`);
-      }
+   
     }
 
    
@@ -60,9 +66,15 @@ const worker = new Worker('webhook-queue', async (job) => {
 
     console.log(`✅ Job ${jobId} finished!`);
 
-  } catch (error) {
-    console.error(`❌ Error in job ${jobId}:`, error);
-    await pool.query('UPDATE jobs SET status = $1 WHERE id = $2', ['failed', jobId]);
+  } catch (error: unknown) {
+  const message = error instanceof Error ? error.message : 'Unknown error';
+
+  console.error(`❌ Error in job ${jobId}:`, message);
+
+  await pool.query(
+    'UPDATE jobs SET status = $1 WHERE id = $2',
+    ['failed', jobId]
+  );
   }
 }, {
  connection : {

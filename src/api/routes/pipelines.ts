@@ -11,7 +11,7 @@ const webhookQueue = new Queue('webhook-queue', {
 
 router.post('/', async (req, res) => {
   const { source_path, processor_type, name, subscriber_url } = req.body;
-  
+
   if (!source_path || !processor_type) {
     return res.status(400).json({ error: 'source_path and processor_type are required' });
   }
@@ -23,18 +23,28 @@ router.post('/', async (req, res) => {
         name || `Pipeline-${source_path}`,
         source_path,
         processor_type,
-        subscriber_url || 'https://httpbin.org/post' 
+        subscriber_url || 'https://httpbin.org/post'
       ]
     );
+
     res.status(201).json(result.rows[0]);
-  } catch (err: any) {
-    if (err.code === '23505') {
-       return res.status(400).json({ error: 'Pipeline path already exists' });
+
+  } catch (err: unknown) {
+
+    if (typeof err === 'object' && err !== null && 'code' in err) {
+      const pgError = err as { code: string };
+
+      if (pgError.code === '23505') {
+        return res.status(400).json({ error: 'Pipeline path already exists' });
+      }
     }
-    res.status(500).json({ error: err.message });
+
+    const message =
+      err instanceof Error ? err.message : 'Unknown error';
+
+    res.status(500).json({ error: message });
   }
 });
-
 router.post('/:path', async (req, res) => {
   const { path } = req.params;
   const payload = req.body;
@@ -86,7 +96,7 @@ router.put('/:id', async (req, res) => {
     );
     if (result.rowCount === 0) return res.status(404).json({ error: 'Pipeline not found' });
     res.json({ message: 'Pipeline updated successfully', data: result.rows[0] });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to update pipeline' });
   }
 });

@@ -5,6 +5,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx tsx watch src/api/index.ts",
     "start": "tsx src/api/index.ts",
@@ -26,13 +27,18 @@
     "express": "^5.2.1",
     "ioredis": "^5.10.1",
     "pg": "^8.20.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^6.0.2"
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^25.5.0",
     "@types/pg": "^8.20.0",
     "drizzle-kit": "^0.31.10",
-    "nodemon": "^3.1.14"
+    "eslint": "^10.1.0",
+    "globals": "^17.4.0",
+    "jiti": "^2.6.1",
+    "nodemon": "^3.1.14",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.57.2"
   }
 }

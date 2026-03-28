@@ -26,9 +26,14 @@ router.get('/:id', async (req, res) => {
                 status: await queueJob.getState()
             } : "Job processed and removed from Redis"
         });
-    } catch (error: any) {
-        res.status(500).json({ error: error.message });
-    }
+    } catch (error: unknown) {
+    const message =
+        error instanceof Error
+            ? error.message
+            : "Unknown error";
+
+    res.status(500).json({ error: message });
+}
 });
 
 export default router;
