@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"No tests yet\"",
     "dev": "npx tsx watch src/api/index.ts",
     "start": "tsx src/api/index.ts",
     "worker": "tsx src/worker/index.ts",
