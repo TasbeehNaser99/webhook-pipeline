@@ -63,6 +63,18 @@ The entire stack can be launched with a single command:
 ```bash
 sudo docker compose up -d --build
 ```
+---
+## 🔐 Security & Authentication
+
+To protect the pipeline configuration, all administrative endpoints (POST, PATCH, DELETE, GET) require a Master API Key.
+
+**Header:** `x-api-key`  
+**Default Key:** `tasbeeh_secret_123` (Configurable via `.env`)
+
+### Webhook Verification
+Every outgoing payload from the Worker is signed with **HMAC-SHA256**. The subscriber can verify the data integrity using the `X-Webhook-Signature` header.
+
+----
 
 ## 📖 Usage Guide
 
@@ -73,6 +85,7 @@ Define a new webhook endpoint and choose a `processor_type` (`transformer`, `fil
 ```bash
 curl -X POST http://localhost:3000/pipelines \
      -H "Content-Type: application/json" \
+     -H "x-api-key: your_master_key" \
      -d '{
        "name": "Order Updates",
        "source_path": "order-updates",
@@ -87,6 +100,7 @@ Send data to your unique path:
 ```bash 
 curl -X POST http://localhost:3000/pipelines/order-updates \
      -H "Content-Type: application/json" \
+     -H "x-api-key: your_master_key" \
      -d '{"order_id": "TAB-2026", "status": "shipped"}'
 ```
 ### 3. Monitor Logs
